@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tokamachi GATE | 十日町市で、もうひとつの暮らしを。</title>
+  <style>
+    /* ── PASSWORD OVERLAY ── */
+    #pw-overlay {
+      position: fixed; inset: 0; z-index: 9999;
+      background:
+        linear-gradient(160deg, rgba(27,42,30,0.82) 0%, rgba(45,106,79,0.7) 100%),
+        url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1600&q=80') center/cover no-repeat;
+      display: flex; align-items: center; justify-content: center;
+    }
+    #pw-overlay.hidden { display: none; }
+    .pw-box {
+      background: rgba(255,255,255,0.07);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 20px;
+      padding: 3rem 2.5rem;
+      width: min(420px, 90vw);
+      text-align: center;
+    }
+    .pw-logo { height: 52px; margin-bottom: 1.8rem; }
+    .pw-box h2 {
+      color: #fff; font-size: 1.1rem; font-weight: 700;
+      margin-bottom: 0.4rem; letter-spacing: 0.04em;
+    }
+    .pw-box p {
+      color: rgba(255,255,255,0.6); font-size: 0.85rem;
+      margin-bottom: 1.8rem;
+    }
+    .pw-input-wrap { position: relative; margin-bottom: 1rem; }
+    #pw-input {
+      width: 100%; padding: 0.85em 3em 0.85em 1.2em;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 10px; color: #fff;
+      font-size: 1rem; outline: none; letter-spacing: 0.1em;
+      transition: border 0.2s;
+      font-family: inherit;
+    }
+    #pw-input::placeholder { color: rgba(255,255,255,0.35); letter-spacing: normal; }
+    #pw-input:focus { border-color: #52b788; }
+    #pw-toggle {
+      position: absolute; right: 1em; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer;
+      color: rgba(255,255,255,0.5); font-size: 1.1rem; padding: 0;
+    }
+    #pw-toggle:hover { color: #fff; }
+    #pw-error {
+      color: #f4a261; font-size: 0.82rem;
+      min-height: 1.2em; margin-bottom: 0.8rem;
+    }
+    #pw-submit {
+      width: 100%; padding: 0.9em;
+      background: #52b788; color: #fff;
+      border: none; border-radius: 10px;
+      font-size: 1rem; font-weight: 700; cursor: pointer;
+      letter-spacing: 0.06em; transition: background 0.2s;
+      font-family: inherit;
+    }
+    #pw-submit:hover { background: #2d6a4f; }
+  </style>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green:    #2d6a4f;
+      --green-lt: #52b788;
+      --earth:    #b5838d;
+      --snow:     #f8f9fa;
+      --dark:     #1b2a1e;
+      --gray:     #6c757d;
+      --white:    #ffffff;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif;
+      color: var(--dark);
+      background: var(--white);
+      line-height: 1.7;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; width: 100%; z-index: 100;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 5%;
+      height: 64px;
+    }
+    .nav-logo {
+      font-size: 1.2rem; font-weight: 700; color: var(--green);
+      text-decoration: none; letter-spacing: 0.05em;
+    }
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a {
+      text-decoration: none; color: var(--dark); font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--green-lt); }
+
+    /* ── HERO ── */
+    #hero {
+      min-height: 100vh;
+      background:
+        linear-gradient(160deg, rgba(27,42,30,0.65) 0%, rgba(45,106,79,0.45) 100%),
+        url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1600&q=80') center/cover no-repeat;
+      display: flex; align-items: center;
+      padding: 80px 5% 0;
+    }
+    .hero-inner { max-width: 680px; }
+    .hero-badge {
+      display: inline-block;
+      background: rgba(82,183,136,0.85);
+      color: #fff;
+      font-size: 0.78rem; letter-spacing: 0.12em;
+      padding: 0.3em 1em; border-radius: 20px;
+      margin-bottom: 1.2rem;
+    }
+    .hero-inner h1 {
+      font-size: clamp(2rem, 5vw, 3.4rem);
+      color: var(--white); line-height: 1.3;
+      font-weight: 800; letter-spacing: 0.02em;
+      margin-bottom: 1.2rem;
+    }
+    .hero-inner h1 span { color: #95d5b2; }
+    .hero-inner p {
+      color: rgba(255,255,255,0.88); font-size: 1.05rem;
+      margin-bottom: 2.2rem; max-width: 500px;
+    }
+    .btn-primary {
+      display: inline-block;
+      background: var(--green-lt); color: var(--white);
+      padding: 0.85em 2.4em; border-radius: 40px;
+      font-size: 1rem; font-weight: 700; letter-spacing: 0.06em;
+      text-decoration: none;
+      transition: background 0.25s, transform 0.15s;
+      border: none; cursor: pointer;
+    }
+    .btn-primary:hover { background: var(--green); transform: translateY(-2px); }
+    .btn-outline {
+      display: inline-block;
+      border: 2px solid rgba(255,255,255,0.7); color: var(--white);
+      padding: 0.8em 2em; border-radius: 40px;
+      font-size: 1rem; font-weight: 600; letter-spacing: 0.04em;
+      text-decoration: none; margin-left: 1rem;
+      transition: background 0.25s;
+    }
+    .btn-outline:hover { background: rgba(255,255,255,0.15); }
+
+    .hero-stats {
+      display: flex; gap: 2.5rem;
+      margin-top: 4rem; padding-top: 2rem;
+      border-top: 1px solid rgba(255,255,255,0.2);
+    }
+    .stat-item { color: var(--white); }
+    .stat-num { font-size: 2rem; font-weight: 800; color: #95d5b2; }
+    .stat-label { font-size: 0.78rem; opacity: 0.8; }
+
+    /* ── SECTION COMMON ── */
+    section { padding: 96px 5%; }
+    .section-tag {
+      display: inline-block;
+      color: var(--green-lt); font-size: 0.8rem;
+      letter-spacing: 0.15em; font-weight: 700;
+      margin-bottom: 0.6rem;
+    }
+    .section-title {
+      font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+      font-weight: 800; line-height: 1.3;
+      margin-bottom: 1rem;
+    }
+    .section-sub {
+      color: var(--gray); font-size: 1rem;
+      max-width: 540px; margin-bottom: 3.5rem;
+    }
+
+    /* ── SERVICES ── */
+    #services { background: var(--snow); }
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.5rem;
+    }
+    .service-card {
+      background: var(--white);
+      border-radius: 16px;
+      padding: 2rem 1.8rem;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .service-card:hover { transform: translateY(-4px); box-shadow: 0 8px 28px rgba(0,0,0,0.1); }
+    .service-icon { font-size: 2.2rem; margin-bottom: 1rem; }
+    .service-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.6rem; }
+    .service-card p { color: var(--gray); font-size: 0.9rem; }
+
+    /* ── ABOUT ── */
+    #about { background: var(--white); }
+    .about-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+    }
+    .about-img {
+      border-radius: 20px; overflow: hidden;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+    }
+    .about-img img { width: 100%; height: 400px; object-fit: cover; display: block; }
+    .about-text .section-sub { margin-bottom: 2rem; }
+    .about-list { list-style: none; }
+    .about-list li {
+      display: flex; align-items: flex-start; gap: 0.8rem;
+      margin-bottom: 1rem; font-size: 0.95rem;
+    }
+    .about-list li::before {
+      content: '✓';
+      color: var(--green-lt); font-weight: 700;
+      flex-shrink: 0; margin-top: 0.1rem;
+    }
+
+    /* ── CONTACT ── */
+    #contact { background: var(--dark); }
+    #contact .section-tag { color: #95d5b2; }
+    #contact .section-title { color: var(--white); }
+    #contact .section-sub { color: rgba(255,255,255,0.6); }
+
+    .contact-form {
+      max-width: 640px;
+      display: grid; gap: 1.2rem;
+    }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+    .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+    .form-group label { font-size: 0.85rem; color: rgba(255,255,255,0.75); }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 8px; padding: 0.75em 1em;
+      color: var(--white); font-size: 0.95rem;
+      outline: none; transition: border 0.2s;
+      font-family: inherit;
+    }
+    .form-group input::placeholder,
+    .form-group textarea::placeholder { color: rgba(255,255,255,0.3); }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus { border-color: var(--green-lt); }
+    .form-group select option { background: var(--dark); }
+    .form-group textarea { resize: vertical; min-height: 130px; }
+    .form-submit { margin-top: 0.5rem; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: #111a13;
+      color: rgba(255,255,255,0.5);
+      text-align: center;
+      padding: 2rem 5%;
+      font-size: 0.85rem;
+    }
+    footer a { color: var(--green-lt); text-decoration: none; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .hero-stats { flex-wrap: wrap; gap: 1.5rem; }
+      .about-inner { grid-template-columns: 1fr; gap: 2rem; }
+      .form-row { grid-template-columns: 1fr; }
+      .btn-outline { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- PASSWORD OVERLAY -->
+<div id="pw-overlay">
+  <div class="pw-box">
+    <img src="logo.svg" alt="Tokamachi GATE" class="pw-logo" />
+    <h2>アクセスコードを入力してください</h2>
+    <p>このページは限定公開です。<br />共有されたパスワードを入力してご覧ください。</p>
+    <div class="pw-input-wrap">
+      <input type="password" id="pw-input" placeholder="パスワード" autocomplete="current-password" />
+      <button id="pw-toggle" type="button" aria-label="表示切替">👁</button>
+    </div>
+    <div id="pw-error"></div>
+    <button id="pw-submit" type="button">入る</button>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#hero">
+    <img src="logo.svg" alt="Tokamachi GATE" style="height:38px; vertical-align:middle;" />
+  </a>
+  <ul class="nav-links">
+    <li><a href="#services">サービス</a></li>
+    <li><a href="#about">会社概要</a></li>
+    <li><a href="#contact">お問い合わせ</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-inner">
+    <span class="hero-badge">新潟県十日町市 × 二地域居住</span>
+    <h1>十日町市に、<br /><span>もうひとつの</span><br />あなたの場所を。</h1>
+    <p>雪国の自然と文化が息づく十日町市で、<br />都市と地方を自由に行き来する新しいライフスタイルを。<br />Tokamachi GATE が、あなたの移住・二地域居住をサポートします。</p>
+    <a href="#contact" class="btn-primary">まずは相談してみる</a>
+    <a href="#services" class="btn-outline">サービスを見る</a>
+    <div class="hero-stats">
+      <div class="stat-item">
+        <div class="stat-num">200+</div>
+        <div class="stat-label">相談実績</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">50+</div>
+        <div class="stat-label">移住・二地域居住の実現世帯</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">15</div>
+        <div class="stat-label">地域パートナー数</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section id="services">
+  <div style="max-width:1100px; margin:0 auto;">
+    <span class="section-tag">SERVICES</span>
+    <h2 class="section-title">十日町暮らしを、まるごとサポート</h2>
+    <p class="section-sub">はじめての方でも安心。相談から定住後のフォローまで、ワンストップでお手伝いします。</p>
+    <div class="services-grid">
+      <div class="service-card">
+        <div class="service-icon">🏡</div>
+        <h3>物件・住まい探し</h3>
+        <p>空き家バンクや賃貸・売買物件の情報提供。現地見学のコーディネートまで対応します。</p>
+      </div>
+      <div class="service-card">
+        <div class="service-icon">💼</div>
+        <h3>仕事・副業マッチング</h3>
+        <p>地域企業への就職、テレワーク環境の整備、農業・観光など地域に根ざした仕事をご紹介。</p>
+      </div>
+      <div class="service-card">
+        <div class="service-icon">🤝</div>
+        <h3>地域コミュニティ接続</h3>
+        <p>地元住民や先輩移住者との交流会を定期開催。十日町の「つながり」に自然に溶け込めます。</p>
+      </div>
+      <div class="service-card">
+        <div class="service-icon">📋</div>
+        <h3>行政手続き・補助金</h3>
+        <p>移住・二地域居住に活用できる補助金や支援制度を調査し、申請までサポートします。</p>
+      </div>
+      <div class="service-card">
+        <div class="service-icon">🎨</div>
+        <h3>ライフスタイル体験ツアー</h3>
+        <p>越後妻有の大地の芸術祭、棚田、雪まつりなど、十日町の魅力を体感できるツアーを企画。</p>
+      </div>
+      <div class="service-card">
+        <div class="service-icon">🏫</div>
+        <h3>教育・子育て環境案内</h3>
+        <p>学校・保育施設の情報から地域の子育てネットワークまで、ファミリー世帯も安心の体制。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="about-inner" style="max-width:1100px; margin:0 auto;">
+    <div class="about-img">
+      <img
+        src="https://images.unsplash.com/photo-1518495973542-4542c06a5843?w=800&q=80"
+        alt="十日町の自然"
+      />
+    </div>
+    <div class="about-text">
+      <span class="section-tag">ABOUT US</span>
+      <h2 class="section-title">Tokamachi GATEについて</h2>
+      <p class="section-sub">
+        十日町市は、日本有数の豪雪地帯でありながら、棚田の絶景・大地の芸術祭・信濃川の清流など、
+        圧倒的な自然と文化が共存する地域です。<br /><br />
+        Tokamachi GATE は「十日町への入口（ゲート）」として、都市部から地方への二地域居住・移住を
+        推進し、人と地域をつなぐ架け橋となることを使命としています。
+      </p>
+      <ul class="about-list">
+        <li>十日町市・新潟県と連携した公的支援制度の活用</li>
+        <li>地域の空き家・遊休施設を活用した拠点づくり</li>
+        <li>都市のスキルを地域に活かすプロジェクト開発</li>
+        <li>越後妻有エリアの豊かな文化・芸術との交流促進</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div style="max-width:1100px; margin:0 auto;">
+    <span class="section-tag">CONTACT</span>
+    <h2 class="section-title" style="color:#fff;">お気軽にご相談ください</h2>
+    <p class="section-sub">移住・二地域居住について、まずは話を聞いてみたいという方も歓迎です。</p>
+    <form class="contact-form" onsubmit="handleSubmit(event)">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="name">お名前 <span style="color:#52b788;">*</span></label>
+          <input type="text" id="name" name="name" placeholder="山田 太郎" required />
+        </div>
+        <div class="form-group">
+          <label for="email">メールアドレス <span style="color:#52b788;">*</span></label>
+          <input type="email" id="email" name="email" placeholder="example@mail.com" required />
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="type">ご相談の種類</label>
+        <select id="type" name="type">
+          <option value="">選択してください</option>
+          <option>二地域居住について</option>
+          <option>移住・定住について</option>
+          <option>物件・住まい探し</option>
+          <option>仕事・副業について</option>
+          <option>体験ツアーについて</option>
+          <option>その他</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="message">メッセージ</label>
+        <textarea id="message" name="message" placeholder="ご質問・ご相談内容をご記入ください。"></textarea>
+      </div>
+      <div class="form-submit">
+        <button type="submit" class="btn-primary">送信する</button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p style="margin-bottom:0.5rem;">
+    <strong style="color:rgba(255,255,255,0.8);">Tokamachi GATE</strong> &nbsp;|&nbsp;
+    新潟県十日町市の二地域居住推進
+  </p>
+  <p>&copy; 2026 Tokamachi GATE. All rights reserved.</p>
+</footer>
+
+<script>
+  // ── PASSWORD PROTECTION ──
+  const PASSWORD = 'gate2026'; // ← ここを変更してください
+
+  (function () {
+    if (sessionStorage.getItem('tg_auth') === '1') {
+      document.getElementById('pw-overlay').classList.add('hidden');
+      return;
+    }
+    document.body.style.overflow = 'hidden';
+
+    document.getElementById('pw-submit').addEventListener('click', tryLogin);
+    document.getElementById('pw-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter') tryLogin();
+    });
+    document.getElementById('pw-toggle').addEventListener('click', () => {
+      const inp = document.getElementById('pw-input');
+      inp.type = inp.type === 'password' ? 'text' : 'password';
+    });
+
+    function tryLogin() {
+      const val = document.getElementById('pw-input').value;
+      const err = document.getElementById('pw-error');
+      if (val === PASSWORD) {
+        sessionStorage.setItem('tg_auth', '1');
+        document.getElementById('pw-overlay').classList.add('hidden');
+        document.body.style.overflow = '';
+      } else {
+        err.textContent = 'パスワードが違います。もう一度お試しください。';
+        document.getElementById('pw-input').value = '';
+        document.getElementById('pw-input').focus();
+      }
+    }
+  })();
+
+  // Smooth nav highlight
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-links a');
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(link => {
+          link.style.color = link.getAttribute('href') === '#' + entry.target.id
+            ? 'var(--green-lt)' : '';
+        });
+      }
+    });
+  }, { threshold: 0.4 });
+
+  sections.forEach(s => observer.observe(s));
+
+  // Form submit
+  function handleSubmit(e) {
+    e.preventDefault();
+    const btn = e.target.querySelector('button[type="submit"]');
+    btn.textContent = '送信しました！';
+    btn.style.background = 'var(--green)';
+    btn.disabled = true;
+    e.target.reset();
+  }
+</script>
+</body>
+</html>
